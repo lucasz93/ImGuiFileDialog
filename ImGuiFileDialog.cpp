@@ -316,6 +316,16 @@ namespace IGFD
 	}
 #endif
 
+	// https://github.com/ocornut/imgui/discussions/3862#discussioncomment-422097
+	inline void ImAlignForWidth(float width, float alignment = 0.5f)
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+		float avail = ImGui::GetContentRegionAvail().x;
+		float off = (avail - width) * alignment;
+		if (off > 0.0f)
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////
 	//// FILE EXTENTIONS INFOS //////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -3653,6 +3663,8 @@ namespace IGFD
 				prDrawHeader(); // bookmark, directory, path
 				prDrawContent(); // bookmark, files view, side pane 
 				res = prDrawFooter(); // file field, filter combobox, ok/cancel buttons
+				if (prFileDialogInternal.puIsOk)
+					res = true;
 
 				EndFrame();
 
@@ -3810,10 +3822,14 @@ namespace IGFD
 
 		bool res = false;
 
+		const ImVec2 buttonSize(100.0f, 0.0f);
+		const auto& style = ImGui::GetStyle();
+		ImAlignForWidth(2 * buttonSize.x + 2 * style.ItemSpacing.x, 1.0f);
+
 		// OK Button
 		if (prFileDialogInternal.puCanWeContinue && strlen(fdFile.puFileNameBuffer))
 		{
-			if (IMGUI_BUTTON(okButtonString "##validationdialog"))
+			if (IMGUI_BUTTON(okButtonString "##validationdialog", buttonSize))
 			{
 				prFileDialogInternal.puIsOk = true;
 				res = true;
@@ -3823,7 +3839,7 @@ namespace IGFD
 		}
 
 		// Cancel Button
-		if (IMGUI_BUTTON(cancelButtonString "##validationdialog") || 
+		if (IMGUI_BUTTON(cancelButtonString "##validationdialog", buttonSize) || 
 			prFileDialogInternal.puNeedToExitDialog) // dialog exit asked
 		{
 			prFileDialogInternal.puIsOk = false;
@@ -3899,6 +3915,12 @@ namespace IGFD
 			else
 			{
 				fdi.SelectFileName(prFileDialogInternal, vInfos);
+				
+				if (ImGui::IsMouseDoubleClicked(0)) // 0 -> left mouse button double click
+				{
+					prFileDialogInternal.puIsOk = true;
+					return true;
+				}
 			}
 		}
 

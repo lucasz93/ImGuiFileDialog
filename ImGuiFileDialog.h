@@ -863,9 +863,11 @@ namespace IGFD
 		std::string puHeaderFileDate;										// detail view name of column date + time
 #ifdef USE_THUMBNAILS
 		std::string puHeaderFileThumbnails;									// detail view name of column thumbnails
-		bool puSortingDirection[5] = { true, true, true, true, true };		// detail view // true => Descending, false => Ascending
+		bool puSortingDirection[5] = { false, false, false, false, false };	// detail view // true => Descending, false => Ascending
+																			// initially false because there's a bug that flips the flag on first use.
 #else
-		bool puSortingDirection[4] = { true, true, true, true };			// detail view // true => Descending, false => Ascending
+		bool puSortingDirection[4] = { false, false, false, false };		// detail view // true => Descending, false => Ascending
+																			// initially false because there's a bug that flips the flag on first use.
 #endif
 		SortingFieldEnum puSortingField = SortingFieldEnum::FIELD_FILENAME;	// detail view sorting column
 		bool puShowDrives = false;											// drives are shown (only on os windows)
